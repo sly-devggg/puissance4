@@ -38,10 +38,8 @@ puissance4/
 ├── style.css           # Styles CSS pour l'interface et les animations
 ├── main.js             # Logique métier du jeu (moteur de jeu)
 ├── README.md           # Documentation du projet
-└── assets/             # Dossier optionnel pour les médias
-    ├── screenshots/    # Captures d'écran du jeu
-    └── demo.gif        # GIF de démonstration
-Technologies utilisées
+
+### Technologies utilisées
 - HTML5 : Structure sémantique et accessibilité
 
 - CSS3 : Mise en forme responsive, flexbox/grid, animations
