@@ -55,19 +55,19 @@ puissance4/
 
 ### Méthode 2 : Clonage Git
 
-git clone https://github.com/sly-devggg/puissance4.git
-cd puissance4  
- Ouvrir index.html dans le navigateur  
-Comment jouer  
-Le joueur 1 (rouge) commence toujours  
+- git clone https://github.com/sly-devggg/puissance4.git  
+- cd puissance4  
+- Ouvrir index.html dans le navigateur  
+- Comment jouer  
+- Le joueur 1 (rouge) commence toujours  
 
-Cliquez sur la colonne où vous souhaitez déposer votre jeton
+- Cliquez en haut de la colonne où vous souhaitez déposer votre jeton
 
-Le jeton tombe automatiquement à la position la plus basse disponible
+- Le jeton tombe automatiquement à la position la plus basse disponible
 
-Les joueurs alternent jusqu'à ce qu'un alignement de 4 jetons soit détecté
+- Les joueurs alternent jusqu'à ce qu'un alignement de 4 jetons soit détecté
 
-Utilisez le bouton "Nouvelle partie" pour recommencer
+- Utilisez le bouton "Nouvelle partie" pour recommencer
 
 ## Démonstration
 - Une vidéo de démonstration est disponible pour illustrer le fonctionnement complet du jeu.
