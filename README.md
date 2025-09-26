@@ -32,7 +32,7 @@
 - Effets visuels : Animations simples pour le placement des jetons et les séquences victorieuses
 
 ### Structure du projet  
-puissance4/
+puissance4/  
 ├── index.html          # Structure principale de l'application   
 ├── style.css           # Styles CSS pour l'interface et les animations   
 ├── main.js             # Logique métier du jeu (moteur de jeu)    
@@ -55,7 +55,7 @@ puissance4/
 
 ### Méthode 2 : Clonage Git
 
-git clone https://github.com/TonUser/puissance4.git  
+git clone https://github.com/sly-devggg/puissance4.git
 cd puissance4  
  Ouvrir index.html dans le navigateur  
 Comment jouer  
