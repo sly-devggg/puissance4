@@ -32,11 +32,9 @@
 - Effets visuels : Animations simples pour le placement des jetons et les séquences victorieuses
 
 ### Structure du projet  
-puissance4/  
-├── index.html          # Structure principale de l'application   
-├── style.css           # Styles CSS pour l'interface et les animations   
-├── main.js             # Logique métier du jeu (moteur de jeu)    
-├── README.md           # Documentation du projet   
+puissance4/   
+├── index.html          # Structure principale de l'application , Styles CSS pour l'interface et les animations  
+├── README.md           # Documentation du projet     
  
 ### Technologies utilisées
 - HTML5 : Structure sémantique et accessibilité

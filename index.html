@@ -1,19 +1,89 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Puissance 4 — Projet Final</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Puissance 4</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; }
+    table { border-collapse: collapse; margin: 20px auto; }
+    td { width: 50px; height: 50px; border: 1px solid black; text-align: center; font-size: 24px; }
+    .joueur1 { color: red; }
+    .joueur2 { color: yellow; }
+  </style>
 </head>
 <body>
-  <main>
-    <h1>Puissance 4</h1>
-    <button id="newGameBtn">Nouvelle partie</button>
-    <div id="status"></div>
-    <div id="board"></div>
-  </main>
+  <h1>Puissance 4</h1>
+  <p id="tour">Tour du joueur 1 (rouge)</p>
+  <table id="plateau"></table>
 
-  <script src="main.js"></script>
+  <script>
+    const lignes = 6, colonnes = 7;
+    const grille = Array.from({length:lignes},()=>Array(colonnes).fill(0));
+    let joueur = 1;
+
+    const plateau = document.getElementById('plateau');
+    const tour = document.getElementById('tour');
+
+    // Créer le tableau HTML
+    for (let l=0; l<lignes; l++) {
+      const tr = document.createElement('tr');
+      for (let c=0; c<colonnes; c++) {
+        const td = document.createElement('td');
+        td.dataset.ligne = l;
+        td.dataset.colonne = c;
+        td.addEventListener('click', ()=>jouerColonne(c));
+        tr.appendChild(td);
+      }
+      plateau.appendChild(tr);
+    }
+
+    function jouerColonne(col) {
+      for (let l=lignes-1; l>=0; l--) {
+        if (grille[l][col]===0) {
+          grille[l][col]=joueur;
+          majAffichage();
+          if (verifVictoire(l,col,joueur)) {
+            tour.textContent = `Joueur ${joueur} a gagné !`;
+            finDePartie();
+          } else if (grille[0].every(x=>x!==0)) {
+            tour.textContent = "Match nul.";
+            finDePartie();
+          } else {
+            joueur = joueur===1?2:1;
+            tour.textContent = `Tour du joueur ${joueur} (${joueur===1?"rouge":"jaune"})`;
+          }
+          return;
+        }
+      }
+      alert("Colonne pleine !");
+    }
+
+    function majAffichage() {
+      document.querySelectorAll('td').forEach(td=>{
+        const l = td.dataset.ligne, c = td.dataset.colonne;
+        td.textContent = '';
+        td.className = '';
+        if (grille[l][c]===1) { td.textContent='●'; td.classList.add('joueur1'); }
+        if (grille[l][c]===2) { td.textContent='●'; td.classList.add('joueur2'); }
+      });
+    }
+
+    function verifVictoire(l,c,j) {
+      const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+      for (const [dl,dc] of dirs) {
+        let suite=1;
+        for (let k=1;k<4;k++){ let nl=l+dl*k,nc=c+dc*k; if(nl>=0&&nl<lignes&&nc>=0&&nc<colonnes&&grille[nl][nc]===j) suite++; else break; }
+        for (let k=1;k<4;k++){ let nl=l-dl*k,nc=c-dc*k; if(nl>=0&&nl<lignes&&nc>=0&&nc<colonnes&&grille[nl][nc]===j) suite++; else break; }
+        if (suite>=4) return true;
+      }
+      return false;
+    }
+
+    function finDePartie() {
+      document.querySelectorAll('td').forEach(td=>{
+        td.replaceWith(td.cloneNode(true)); // retire les clics
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,128 +1,64 @@
+// puissance4.js — node
+const readline = require('readline');
+
 class Puissance4 {
-  constructor(boardEl, statusEl) {
-    this.rows = 6;
-    this.cols = 7;
-    this.grid = this.emptyGrid();
-    this.current = 1;
-    this.gameOver = false;
-    this.boardEl = boardEl;
-    this.statusEl = statusEl;
-    this.setupUI();
-    this.render();
-    this.updateStatus();
+  constructor() {
+    this.lignes = 6;
+    this.colonnes = 7;
+    this.grille = Array.from({length:this.lignes},()=>Array(this.colonnes).fill(0));
+    this.joueur = 1;
+    this.terminal = readline.createInterface({input:process.stdin, output:process.stdout});
+    this.jouer();
   }
-  emptyGrid() {
-    return Array.from({length: this.rows}, () => Array(this.cols).fill(0));
-  }
-  setupUI() {
-    this.boardEl.innerHTML = '';
-    for (let r=0; r<this.rows; r++){
-      for (let c=0; c<this.cols; c++){
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.dataset.row = r;
-        cell.dataset.col = c;
-        if (r === 0) {
-          cell.addEventListener('click', () => this.handleColumnClick(c));
-        }
-        const slot = document.createElement('div');
-        slot.className = 'slot';
-        cell.appendChild(slot);
-        this.boardEl.appendChild(cell);
+
+  afficher() {
+    console.clear();
+    console.log(' 0 1 2 3 4 5 6');
+    for (let l=0; l<this.lignes; l++) {
+      let ligne = '';
+      for (let c=0; c<this.colonnes; c++) {
+        const v = this.grille[l][c];
+        ligne += (v===0?'.':v===1?'O':'X')+' ';
       }
+      console.log(ligne.trim());
     }
+    console.log(`Joueur ${this.joueur} (${this.joueur===1?'O':'X'}) — Choisis une colonne (0-${this.colonnes-1})`);
   }
-  handleColumnClick(col) {
-    if (this.gameOver) return;
-    const row = this.dropRow(col);
-    if (row === -1) return;
-    this.grid[row][col] = this.current;
-    this.afterMove(row, col);
-  }
-  dropRow(col) {
-    for (let r=this.rows-1; r>=0; r--){
-      if (this.grid[r][col] === 0) return r;
-    }
+
+  poserJeton(col) {
+    for (let l=this.lignes-1; l>=0; l--) 
+      if (this.grille[l][col]===0) { this.grille[l][col]=this.joueur; return l; }
     return -1;
   }
-  afterMove(row, col) {
-    const win = this.checkWin(row, col, this.current);
-    this.render();
-    if (win) {
-      this.gameOver = true;
-      this.highlightWin(win);
-      this.statusEl.textContent = `Joueur ${this.current} gagne ! 🎉`;
-      return;
+
+  dansGrille(l,c) { return l>=0 && l<this.lignes && c>=0 && c<this.colonnes; }
+
+  aGagne(l,c,j) {
+    const directions = [[0,1],[1,0],[1,1],[1,-1]];
+    for (const [dl,dc] of directions) {
+      let suite=1;
+      for (let k=1;k<4;k++){ let nl=l+dl*k,nc=c+dc*k; if(this.dansGrille(nl,nc)&&this.grille[nl][nc]===j) suite++; else break; }
+      for (let k=1;k<4;k++){ let nl=l-dl*k,nc=c-dc*k; if(this.dansGrille(nl,nc)&&this.grille[nl][nc]===j) suite++; else break; }
+      if (suite>=4) return true;
     }
-    if (this.isFull()) {
-      this.gameOver = true;
-      this.statusEl.textContent = "Match nul.";
-      return;
-    }
-    this.current = this.current === 1 ? 2 : 1;
-    this.updateStatus();
+    return false;
   }
-  isFull() { return this.grid[0].every(c => c !== 0); }
-  render() {
-    const slots = Array.from(this.boardEl.querySelectorAll('.slot'));
-    slots.forEach(slot => {
-      const parent = slot.parentElement;
-      const r = +parent.dataset.row;
-      const c = +parent.dataset.col;
-      const val = this.grid[r][c];
-      slot.className = 'slot';
-      if (val === 1) slot.classList.add('p1');
-      if (val === 2) slot.classList.add('p2');
+
+  grillePleine(){ return this.grille[0].every(x=>x!==0); }
+
+  jouer() {
+    this.afficher();
+    this.terminal.question('> ', reponse=>{
+      const col = Number(reponse);
+      if(!Number.isInteger(col)||col<0||col>=this.colonnes){ console.log('Colonne invalide.'); return this.jouer(); }
+      const ligne = this.poserJeton(col);
+      if(ligne===-1){ console.log('Colonne pleine.'); return this.jouer(); }
+      if(this.aGagne(ligne,col,this.joueur)){ this.afficher(); console.log(`Joueur ${this.joueur} gagne !`); return this.terminal.close(); }
+      if(this.grillePleine()){ this.afficher(); console.log('Match nul.'); return this.terminal.close(); }
+      this.joueur = this.joueur===1?2:1;
+      this.jouer();
     });
-  }
-  reset() {
-    this.grid = this.emptyGrid();
-    this.current = 1;
-    this.gameOver = false;
-    this.clearHighlights();
-    this.render();
-    this.updateStatus();
-  }
-  updateStatus() {
-    this.statusEl.textContent = `Au tour du joueur ${this.current} ${this.current===1?'🔴':'🟡'}`;
-  }
-  checkWin(r,c,player) {
-    const dirs = [[0,1],[1,0],[1,1],[1,-1]];
-    for (const [dr,dc] of dirs){
-      const line=[[r,c]];
-      for (let k=1;k<4;k++){
-        const nr=r+dr*k,nc=c+dc*k;
-        if (this.inBounds(nr,nc) && this.grid[nr][nc]===player) line.push([nr,nc]); else break;
-      }
-      for (let k=1;k<4;k++){
-        const nr=r-dr*k,nc=c-dc*k;
-        if (this.inBounds(nr,nc) && this.grid[nr][nc]===player) line.unshift([nr,nc]); else break;
-      }
-      if (line.length>=4) return line.slice(0,4);
-    }
-    return null;
-  }
-  inBounds(r,c){ return r>=0 && r<this.rows && c>=0 && c<this.cols; }
-  highlightWin(coords){
-    const cells = Array.from(this.boardEl.querySelectorAll('.cell'));
-    for (const [r,c] of coords){
-      const match = cells.find(el=>+el.dataset.row===r && +el.dataset.col===c);
-      if (match){
-        match.querySelector('.slot').classList.add('winning');
-      }
-    }
-  }
-  clearHighlights(){
-    this.boardEl.querySelectorAll('.slot.winning').forEach(s=>s.classList.remove('winning'));
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  const board = document.getElementById('board');
-  const status = document.getElementById('status');
-  const game = new Puissance4(board, status);
-
-  document.getElementById('newGameBtn').addEventListener('click', () => {
-    game.reset();
-  });
-});
+new Puissance4();
