@@ -4,11 +4,10 @@
   <meta charset="UTF-8">
   <title>Puissance 4</title>
   <style>
-    body { font-family: sans-serif; text-align: center; }
-    table { border-collapse: collapse; margin: 20px auto; }
-    td { width: 50px; height: 50px; border: 1px solid black; text-align: center; font-size: 24px; }
-    .joueur1 { color: red; }
-    .joueur2 { color: yellow; }
+    table { border-collapse: collapse; margin:20px auto; }
+    td { width:50px; height:50px; border:1px solid black; text-align:center; font-size:30px; }
+    .rouge { color:red; }
+    .jaune { color:gold; }
   </style>
 </head>
 <body>
@@ -17,72 +16,84 @@
   <table id="plateau"></table>
 
   <script>
-    const lignes = 6, colonnes = 7;
-    const grille = Array.from({length:lignes},()=>Array(colonnes).fill(0));
+    // Dimensions de la grille
+    let lignes = 6, colonnes = 7;
+    let grille = [];
+    for (let i=0; i<lignes; i++) {
+      grille.push([]);
+      for (let j=0; j<colonnes; j++) grille[i].push(0);
+    }
+
     let joueur = 1;
+    let plateau = document.getElementById("plateau");
+    let tour = document.getElementById("tour");
 
-    const plateau = document.getElementById('plateau');
-    const tour = document.getElementById('tour');
+    // Création de la grille HTML
+    for (let i=0; i<lignes; i++) {
+      let tr = document.createElement("tr");
+      for (let j=0; j<colonnes; j++) {
+        let td = document.createElement("td");
+        td.dataset.ligne = i;
+        td.dataset.colonne = j;
+        td.addEventListener("click", function() {
+          // Trouver la première case vide dans cette colonne
+          let ligneLibre = -1;
+          for (let k=lignes-1; k>=0; k--) {
+            if (grille[k][j]===0) { ligneLibre=k; break; }
+          }
+          if (ligneLibre === -1) { alert("Colonne pleine"); return; }
 
-    // Créer le tableau HTML
-    for (let l=0; l<lignes; l++) {
-      const tr = document.createElement('tr');
-      for (let c=0; c<colonnes; c++) {
-        const td = document.createElement('td');
-        td.dataset.ligne = l;
-        td.dataset.colonne = c;
-        td.addEventListener('click', ()=>jouerColonne(c));
+          // Placer le pion
+          grille[ligneLibre][j] = joueur;
+
+          // Mettre à jour l'affichage
+          document.querySelectorAll("td").forEach(cell=>{
+            let li = cell.dataset.ligne, co = cell.dataset.colonne;
+            cell.textContent = "";
+            cell.className = "";
+            if (grille[li][co]===1) { cell.textContent="●"; cell.classList.add("rouge"); }
+            if (grille[li][co]===2) { cell.textContent="●"; cell.classList.add("jaune"); }
+          });
+
+          // Vérifier victoire
+          let directions = [[0,1],[1,0],[1,1],[1,-1]];
+          let victoire = false;
+          for (let d=0; d<directions.length; d++) {
+            let [dl,dc] = directions[d];
+            let suite = 1;
+
+            for (let k=1; k<4; k++) {
+              let nl=ligneLibre+dl*k, nc=j+dc*k;
+              if (nl>=0 && nl<lignes && nc>=0 && nc<colonnes && grille[nl][nc]===joueur) suite++;
+              else break;
+            }
+            for (let k=1; k<4; k++) {
+              let nl=ligneLibre-dl*k, nc=j-dc*k;
+              if (nl>=0 && nl<lignes && nc>=0 && nc<colonnes && grille[nl][nc]===joueur) suite++;
+              else break;
+            }
+            if (suite>=4) { victoire = true; break; }
+          }
+
+          if (victoire) {
+            tour.textContent = "Joueur "+joueur+" a gagné !";
+            document.querySelectorAll("td").forEach(td=>td.replaceWith(td.cloneNode(true)));
+            return;
+          }
+
+          // Vérifier match nul
+          if (grille[0].every(x=>x!==0)) {
+            tour.textContent = "Match nul.";
+            return;
+          }
+
+          // Changer de joueur
+          joueur = (joueur===1?2:1);
+          tour.textContent = "Tour du joueur "+joueur+(joueur===1?" (rouge)":" (jaune)");
+        });
         tr.appendChild(td);
       }
       plateau.appendChild(tr);
-    }
-
-    function jouerColonne(col) {
-      for (let l=lignes-1; l>=0; l--) {
-        if (grille[l][col]===0) {
-          grille[l][col]=joueur;
-          majAffichage();
-          if (verifVictoire(l,col,joueur)) {
-            tour.textContent = `Joueur ${joueur} a gagné !`;
-            finDePartie();
-          } else if (grille[0].every(x=>x!==0)) {
-            tour.textContent = "Match nul.";
-            finDePartie();
-          } else {
-            joueur = joueur===1?2:1;
-            tour.textContent = `Tour du joueur ${joueur} (${joueur===1?"rouge":"jaune"})`;
-          }
-          return;
-        }
-      }
-      alert("Colonne pleine !");
-    }
-
-    function majAffichage() {
-      document.querySelectorAll('td').forEach(td=>{
-        const l = td.dataset.ligne, c = td.dataset.colonne;
-        td.textContent = '';
-        td.className = '';
-        if (grille[l][c]===1) { td.textContent='●'; td.classList.add('joueur1'); }
-        if (grille[l][c]===2) { td.textContent='●'; td.classList.add('joueur2'); }
-      });
-    }
-
-    function verifVictoire(l,c,j) {
-      const dirs = [[0,1],[1,0],[1,1],[1,-1]];
-      for (const [dl,dc] of dirs) {
-        let suite=1;
-        for (let k=1;k<4;k++){ let nl=l+dl*k,nc=c+dc*k; if(nl>=0&&nl<lignes&&nc>=0&&nc<colonnes&&grille[nl][nc]===j) suite++; else break; }
-        for (let k=1;k<4;k++){ let nl=l-dl*k,nc=c-dc*k; if(nl>=0&&nl<lignes&&nc>=0&&nc<colonnes&&grille[nl][nc]===j) suite++; else break; }
-        if (suite>=4) return true;
-      }
-      return false;
-    }
-
-    function finDePartie() {
-      document.querySelectorAll('td').forEach(td=>{
-        td.replaceWith(td.cloneNode(true)); // retire les clics
-      });
     }
   </script>
 </body>
